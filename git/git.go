@@ -43,6 +43,7 @@ func (gc Config) CloneOrPull(url, repoPath string) (map[string]struct{}, error) 
 			updatedFiles[strings.TrimSpace(filename)] = struct{}{}
 		}
 	} else {
+		log.Infof("git clone")
 		if err = os.MkdirAll(repoPath, 0700); err != nil {
 			return nil, err
 		}
@@ -50,9 +51,9 @@ func (gc Config) CloneOrPull(url, repoPath string) (map[string]struct{}, error) 
 			return nil, err
 		}
 
-		if err := fetchAll(repoPath); err != nil {
-			return nil, err
-		}
+		// if err := fetchAll(repoPath); err != nil {
+		// 	return nil, err
+		// }
 		err = filepath.Walk(repoPath, func(path string, info os.FileInfo, err error) error {
 			if info.IsDir() {
 				return nil
@@ -209,7 +210,7 @@ func DiffFile(repoPath string, hash, file string) ([]string, error) {
 	return strings.Split(strings.TrimSpace(output), "\n"), nil
 }
 
-// DiffRev :
+// DiffPrev :
 func DiffPrev(repoPath string, hash string) ([]string, error) {
 	commandArgs := generateGitArgs(repoPath)
 
