@@ -5,5 +5,5 @@ type MsfModuleCVE struct {
 	ModuleName        string
 	ModuleTitle       string
 	ModuleDiscription string
-	CveID             string
+	CveIDs            []string
 }

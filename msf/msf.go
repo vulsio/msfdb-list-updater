@@ -21,8 +21,12 @@ var (
 	repoDir string
 	files   []string
 
+	titleRegex   = regexp.MustCompile(`['|\"]Name['|\"]\s*=>\s*['|\"|\(](.+)['|\"|\)]`)
+	summaryRegex = regexp.MustCompile(`['|\"]Description['|\"][\s\S]*?['|\"|\)],\n|['|\"]Description['|\"][^\}]+},\n`)
+
 	cveIDRegexp1 = regexp.MustCompile(`\[\s*'CVE'\s*,\s*'(\d{4})[-–](\d{4,})\s*'\s*\]`)
 	cveIDRegexp2 = regexp.MustCompile(`\[\s*'CVE'\s*=>\s*'(\d{4})[-–](\d{4,})\s*'\s*\]`)
+	cveIDRegexp3 = regexp.MustCompile(`['|\"]CVE['|\"],\s['|\"](\d{4})-(\d+)['|\"]`)
 )
 
 // Config :
@@ -72,10 +76,6 @@ func WalkDirTree(root string) error {
 		}
 		fmt.Println(modules)
 
-		files = append(files, path)
-		for _, file := range files {
-			fmt.Println(file)
-		}
 		return nil
 	})
 	if err != nil {
@@ -90,19 +90,20 @@ func parse(file []byte, path string) (modules *MsfModuleCVE, err error) {
 	modules.ModuleName = filepath.Base(path)
 
 	regxps := []*regexp.Regexp{
-		cveIDRegexp1,
-		cveIDRegexp2,
+		cveIDRegexp3,
 	}
 
+	var cveIDs []string
 	for _, re := range regxps {
 		results := re.FindAllSubmatch(file, -1)
 		for _, matches := range results {
 			if 2 < len(matches) {
 				cveID := fmt.Sprintf("CVE-%s-%s", matches[1], matches[2])
-				modules.CveID = cveID
+				cveIDs = append(cveIDs, cveID)
 			}
 		}
 	}
+	modules.CveIDs = cveIDs
 
 	return modules, nil
 }
