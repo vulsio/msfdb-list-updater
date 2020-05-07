@@ -34,6 +34,7 @@ func run() error {
 	flag.Parse()
 	now := time.Now().UTC()
 	gc := &git.Config{}
+	vulnListDir := utils.VulnListDir()
 
 	repoOwner := defaultRepoOwner
 	repoName := defaultRepoName
@@ -52,11 +53,14 @@ func run() error {
 	switch *target {
 	case "msf":
 		// TODO : Call msf module parser
-		log.Infof("msf module persing... TBA")
-		if err := msf.Update(); err != nil {
+		mf := msf.Config{
+			GitClient:   gc,
+			CacheDir:    utils.CacheDir(),
+			VulnListDir: vulnListDir,
+		}
+		if err := mf.Update(); err != nil {
 			return xerrors.Errorf("error in module update: %w", err)
 		}
-
 		// commitMsg = "MSF modules"
 	default:
 		return xerrors.New("unknown target")
