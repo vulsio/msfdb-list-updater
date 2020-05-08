@@ -43,7 +43,7 @@ func run() error {
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	url := fmt.Sprintf(repoURL, githubToken, repoOwner, repoName)
 
-	log.Infof("target repository is %s/%s", repoOwner, repoName)
+	log.Infof("Target repository is %s/%s", repoOwner, repoName)
 
 	if _, err := gc.CloneOrPull(url, utils.VulnListDir()); err != nil {
 		return xerrors.Errorf("clone or pull error: %w", err)

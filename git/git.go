@@ -33,7 +33,7 @@ func (gc Config) CloneOrPull(url, repoPath string) (map[string]struct{}, error) 
 
 	updatedFiles := map[string]struct{}{}
 	if exists {
-		log.Infof("git pull")
+		log.Infof("git pull --> %s", repoPath)
 		files, err := pull(url, repoPath)
 		if err != nil {
 			return nil, xerrors.Errorf("git pull error: %w", err)
@@ -43,7 +43,7 @@ func (gc Config) CloneOrPull(url, repoPath string) (map[string]struct{}, error) 
 			updatedFiles[strings.TrimSpace(filename)] = struct{}{}
 		}
 	} else {
-		log.Infof("git clone")
+		log.Infof("git clone --> %s", repoPath)
 		if err = os.MkdirAll(repoPath, 0700); err != nil {
 			return nil, err
 		}
@@ -51,9 +51,6 @@ func (gc Config) CloneOrPull(url, repoPath string) (map[string]struct{}, error) 
 			return nil, err
 		}
 
-		// if err := fetchAll(repoPath); err != nil {
-		// 	return nil, err
-		// }
 		err = filepath.Walk(repoPath, func(path string, info os.FileInfo, err error) error {
 			if info.IsDir() {
 				return nil
@@ -121,20 +118,6 @@ func pull(url, repoPath string) ([]string, error) {
 	}
 	updatedFiles := strings.Split(strings.TrimSpace(output), "\n")
 	return updatedFiles, nil
-}
-
-func fetchAll(repoPath string) error {
-	commandArgs := generateGitArgs(repoPath)
-	configCmd := []string{"config", "remote.origin.fetch", "+refs/heads/*:refs/remotes/origin/*"}
-	if _, err := utils.Exec("git", append(commandArgs, configCmd...)); err != nil {
-		return xerrors.Errorf("error in git config: %w", err)
-	}
-
-	fetchCmd := []string{"fetch", "--all"}
-	if _, err := utils.Exec("git", append(commandArgs, fetchCmd...)); err != nil {
-		return xerrors.Errorf("error in git fetch: %w", err)
-	}
-	return nil
 }
 
 // Commit :
