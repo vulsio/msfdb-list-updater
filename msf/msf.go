@@ -12,10 +12,12 @@ import (
 
 	"github.com/vulsio/msfdb-list-updater/git"
 	log "github.com/vulsio/msfdb-list-updater/log"
+	"github.com/vulsio/msfdb-list-updater/utils"
 )
 
 const (
 	repoURL = "https://github.com/rapid7/metasploit-framework.git"
+	msfDir  = "msf"
 )
 
 var (
@@ -25,6 +27,7 @@ var (
 	summaryRegexp1 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*%q{([^}]*)}`)
 	summaryRegexp2 = regexp.MustCompile(`['|\"]Description['|\"][\s\S]*?['|\"|\)],\n`)
 	cveIDRegexp    = regexp.MustCompile(`['|\"]CVE['|\"],\s['|\"](\d{4})-(\d+)['|\"]`)
+	edbIDRegexp    = regexp.MustCompile(`['|\"]EDB['|\"],\s['|\"](\d+)['|\"]`)
 )
 
 // Config :
@@ -68,14 +71,16 @@ func WalkDirTree(root string) error {
 			return xerrors.Errorf("error in file open: %w", err)
 		}
 
-		modules, err := parse(f, path)
+		module, err := parse(f, path)
 		if err != nil {
 			return xerrors.Errorf("error in parse: %w", err)
 		}
-		fmt.Println(modules.ModuleName)
-		fmt.Println(modules.ModuleTitle)
-		fmt.Println(modules.ModuleDiscription)
-		fmt.Println(modules.CveIDs)
+
+		for _, cve := range module.CveIDs {
+			if err = utils.SaveCVEPerYear(msfDir, cve, module); err != nil {
+				return xerrors.Errorf("error in save: %w", err)
+			}
+		}
 
 		return nil
 	})
@@ -86,11 +91,11 @@ func WalkDirTree(root string) error {
 	return nil
 }
 
-func parse(file []byte, path string) (modules *MsfModuleCVE, err error) {
-	modules = &MsfModuleCVE{}
+func parse(file []byte, path string) (module *MsfModule, err error) {
+	module = &MsfModule{}
 
 	// module name
-	modules.ModuleName = filepath.Base(path)
+	module.Name = filepath.Base(path)
 
 	// module title
 	var title string
@@ -100,7 +105,7 @@ func parse(file []byte, path string) (modules *MsfModuleCVE, err error) {
 			title = fmt.Sprintf("%s", m[1])
 		}
 	}
-	modules.ModuleTitle = title
+	module.Title = title
 
 	// module discription
 	var summary string
@@ -123,7 +128,7 @@ func parse(file []byte, path string) (modules *MsfModuleCVE, err error) {
 			}
 		}
 	}
-	modules.ModuleDiscription = summary
+	module.Discription = summary
 
 	// module cves
 	var cveIDs []string
@@ -134,7 +139,7 @@ func parse(file []byte, path string) (modules *MsfModuleCVE, err error) {
 			cveIDs = append(cveIDs, cveID)
 		}
 	}
-	modules.CveIDs = cveIDs
+	module.CveIDs = cveIDs
 
-	return modules, nil
+	return module, nil
 }

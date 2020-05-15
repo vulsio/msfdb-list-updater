@@ -2,10 +2,13 @@ package utils
 
 import (
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"golang.org/x/xerrors"
@@ -71,4 +74,43 @@ func LookupEnv(key, defaultValue string) string {
 		return val
 	}
 	return defaultValue
+}
+
+// SaveCVEPerYear :
+func SaveCVEPerYear(dirName string, cveID string, data interface{}) error {
+	s := strings.Split(cveID, "-")
+	if len(s) != 3 {
+		return xerrors.Errorf("invalid CVE-ID format: %s\n", cveID)
+	}
+
+	yearDir := filepath.Join(VulnListDir(), dirName, s[1])
+	if err := os.MkdirAll(yearDir, os.ModePerm); err != nil {
+		return err
+	}
+
+	filePath := filepath.Join(yearDir, fmt.Sprintf("%s.json", cveID))
+	if err := Write(filePath, data); err != nil {
+		return xerrors.Errorf("failed to write file: %w", err)
+	}
+	return nil
+}
+
+// Write :
+func Write(filePath string, data interface{}) error {
+	f, err := os.Create(filePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	b, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	_, err = f.Write(b)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -1,9 +1,9 @@
 package msf
 
-// MsfModuleCVE :
-type MsfModuleCVE struct {
-	ModuleName        string
-	ModuleTitle       string
-	ModuleDiscription string
-	CveIDs            []string
+// MsfModule :
+type MsfModule struct {
+	Name        string
+	Title       string
+	Discription string
+	CveIDs      []string
 }
