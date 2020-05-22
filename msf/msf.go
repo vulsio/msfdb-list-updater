@@ -28,6 +28,7 @@ var (
 	summaryRegexp2 = regexp.MustCompile(`['|\"]Description['|\"][\s\S]*?['|\"|\)],\n`)
 	cveIDRegexp    = regexp.MustCompile(`['|\"]CVE['|\"],\s['|\"](\d{4})-(\d+)['|\"]`)
 	edbIDRegexp    = regexp.MustCompile(`['|\"]EDB['|\"],\s['|\"](\d+)['|\"]`)
+	refURLRegexp   = regexp.MustCompile(`['|\"]URL['|\"],\s['|\"](\S+)['|\"]`)
 )
 
 // Config :
@@ -140,6 +141,28 @@ func parse(file []byte, path string) (module *MsfModule, err error) {
 		}
 	}
 	module.CveIDs = cveIDs
+
+	// module exploitdb
+	var edbIDs []string
+	edbMatches := edbIDRegexp.FindAllSubmatch(file, -1)
+	for _, m := range edbMatches {
+		if 1 < len(m) {
+			edbID := fmt.Sprintf("EDB-%s", m[1])
+			edbIDs = append(edbIDs, edbID)
+		}
+	}
+	module.EdbIDs = edbIDs
+
+	// module Referenses
+	var refURLs []string
+	urlMatches := refURLRegexp.FindAllSubmatch(file, -1)
+	for _, m := range urlMatches {
+		if 1 < len(m) {
+			url := fmt.Sprintf("%s", m[1])
+			refURLs = append(refURLs, url)
+		}
+	}
+	module.RefURLs = refURLs
 
 	return module, nil
 }

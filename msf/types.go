@@ -6,4 +6,6 @@ type MsfModule struct {
 	Title       string
 	Discription string
 	CveIDs      []string
+	EdbIDs      []string
+	RefURLs     []string
 }
