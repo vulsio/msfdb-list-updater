@@ -15,9 +15,19 @@ import (
 	"github.com/vulsio/msfdb-list-updater/utils"
 )
 
+// MsfModule :
+type MsfModule struct {
+	Name        string   `json:",omitempty"`
+	Title       string   `json:",omitempty"`
+	Discription string   `json:",omitempty"`
+	CveIDs      []string `json:",omitempty"`
+	EdbIDs      []string `json:",omitempty"`
+	RefURLs     []string `json:",omitempty"`
+}
+
 const (
 	repoURL = "https://github.com/rapid7/metasploit-framework.git"
-	msfDir  = "msf"
+	msfDir  = "rapid7"
 )
 
 var (
@@ -59,32 +69,41 @@ func (c Config) Update() (err error) {
 
 // WalkDirTree :
 func WalkDirTree(root string) error {
-	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return xerrors.Errorf("file walk error: %w", err)
-		}
-		if info.IsDir() {
-			return nil
-		}
-
-		f, err := ioutil.ReadFile(path)
-		if err != nil {
-			return xerrors.Errorf("error in file open: %w", err)
-		}
-
-		module, err := parse(f, path)
-		if err != nil {
-			return xerrors.Errorf("error in parse: %w", err)
-		}
-
-		for _, cve := range module.CveIDs {
-			if err = utils.SaveCVEPerYear(msfDir, cve, module); err != nil {
-				return xerrors.Errorf("error in save: %w", err)
+	err := filepath.Walk(root,
+		func(path string, info os.FileInfo, err error) error {
+			if err != nil {
+				return xerrors.Errorf("file walk error: %w", err)
 			}
-		}
+			if info.IsDir() {
+				return nil
+			}
 
-		return nil
-	})
+			m, err := filepath.Match("example*", info.Name())
+			if err != nil {
+				return xerrors.Errorf("error in file check: %w", err)
+			}
+			if m {
+				return nil
+			}
+
+			f, err := ioutil.ReadFile(path)
+			if err != nil {
+				return xerrors.Errorf("error in file open: %w", err)
+			}
+
+			module, err := parse(f, path)
+			if err != nil {
+				return xerrors.Errorf("error in parse: %w", err)
+			}
+
+			for _, cve := range module.CveIDs {
+				if err = utils.SaveCVEPerYear(msfDir, cve, module); err != nil {
+					return xerrors.Errorf("error in save: %w", err)
+				}
+			}
+
+			return nil
+		})
 	if err != nil {
 		return xerrors.Errorf("error in walk: %w", err)
 	}

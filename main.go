@@ -49,10 +49,9 @@ func run() error {
 		return xerrors.Errorf("clone or pull error: %w", err)
 	}
 
-	// var commitMsg string
+	var commitMsg string
 	switch *target {
 	case "msf":
-		// TODO : Call msf module parser
 		mf := msf.Config{
 			GitClient:   gc,
 			CacheDir:    utils.CacheDir(),
@@ -61,7 +60,7 @@ func run() error {
 		if err := mf.Update(); err != nil {
 			return xerrors.Errorf("error in module update: %w", err)
 		}
-		// commitMsg = "MSF modules"
+		commitMsg = "Metasploit Framework Modules"
 	default:
 		return xerrors.New("unknown target")
 	}
@@ -82,10 +81,10 @@ func run() error {
 		return nil
 	}
 
-	// log.Println("git commit")
-	// if err = gc.Commit(utils.VulnListDir(), "./", commitMsg); err != nil {
-	// 	return xerrors.Errorf("failed to git commit: %w", err)
-	// }
+	log.Infof("git commit")
+	if err = gc.Commit(utils.VulnListDir(), "./", commitMsg); err != nil {
+		return xerrors.Errorf("failed to git commit: %w", err)
+	}
 
 	// log.Println("git push")
 	// if err = gc.Push(utils.VulnListDir(), "master"); err != nil {
