@@ -108,6 +108,10 @@ func Write(filePath string, data interface{}) error {
 		return err
 	}
 
+	b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
+	b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
+	b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
+
 	_, err = f.Write(b)
 	if err != nil {
 		return err

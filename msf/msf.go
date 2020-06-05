@@ -35,7 +35,8 @@ var (
 	files          []string
 	titleRegex     = regexp.MustCompile(`['|\"]Name['|\"]\s*=>\s*['|\"|\(](.+)['|\"|\)]`)
 	summaryRegexp1 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*%q{([^}]*)}`)
-	summaryRegexp2 = regexp.MustCompile(`['|\"]Description['|\"][\s\S]*?['|\"|\)],\n`)
+	summaryRegexp2 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*%q\(([^}]*)\),`)
+	summaryRegexp3 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*['|\"|\(]([\s\S]*?)['|\"|\)],\n`)
 	cveIDRegexp    = regexp.MustCompile(`['|\"]CVE['|\"],\s['|\"](\d{4})-(\d+)['|\"]`)
 	edbIDRegexp    = regexp.MustCompile(`['|\"]EDB['|\"],\s['|\"](\d+)['|\"]`)
 	refURLRegexp   = regexp.MustCompile(`['|\"]URL['|\"],\s['|\"](\S+)['|\"]`)
@@ -91,7 +92,7 @@ func WalkDirTree(root string) error {
 				return xerrors.Errorf("error in file open: %w", err)
 			}
 
-			module, err := parse(f, path)
+			module, err := Parse(f, path)
 			if err != nil {
 				return xerrors.Errorf("error in parse: %w", err)
 			}
@@ -111,7 +112,8 @@ func WalkDirTree(root string) error {
 	return nil
 }
 
-func parse(file []byte, path string) (module *MsfModule, err error) {
+// Parse :
+func Parse(file []byte, path string) (module *MsfModule, err error) {
 	module = &MsfModule{}
 
 	// module name
@@ -129,10 +131,11 @@ func parse(file []byte, path string) (module *MsfModule, err error) {
 
 	// module discription
 	var summary string
-	var sentence []string
+	var s []string
 	regxps := []*regexp.Regexp{
 		summaryRegexp1,
 		summaryRegexp2,
+		summaryRegexp3,
 	}
 	for _, re := range regxps {
 		summaryMatches := re.FindAllSubmatch(file, -1)
@@ -141,10 +144,11 @@ func parse(file []byte, path string) (module *MsfModule, err error) {
 				summary = fmt.Sprintf(`%s`, m[1])
 				lines := strings.Split(summary, "\n")
 				for _, l := range lines {
-					text := strings.Replace(strings.TrimSpace(l), "\n", "", -1)
-					sentence = append(sentence, text)
+					t := strings.Replace(strings.TrimSpace(l), "\n", "", -1)
+					s = append(s, t)
 				}
-				summary = strings.Join(sentence[:], "")
+				summary = strings.Join(s[:], " ")
+				summary = strings.TrimSpace(summary)
 			}
 		}
 	}
