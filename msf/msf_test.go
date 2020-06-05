@@ -63,6 +63,18 @@ func TestParse(t *testing.T) {
 				Discription: "Sample Auxiliary Module",
 			},
 		},
+		{
+			file: "testdata/metasploit-framework/modules/auxiliary/sqli/openemr/openemr_sqli_dump.rb",
+			module: &msf.MsfModule{
+				Name:        "openemr_sqli_dump.rb",
+				Title:       "OpenEMR 5.0.1 Patch 6 SQLi Dump",
+				Discription: "This module exploits a SQLi vulnerability found in OpenEMR version 5.0.1 Patch 6 and lower. The vulnerability allows the contents of the entire database (with exception of log and task tables) to be extracted. This module saves each table as a `.csv` file in your loot directory and has been tested with OpenEMR 5.0.1 (3).",
+				CveIDs:      []string{"2018-17179"},
+				RefURLs: []string{
+					"https://github.com/openemr/openemr/commit/3e22d11c7175c1ebbf3d862545ce6fee18f70617",
+				},
+			},
+		},
 	}
 
 	for _, v := range vectors {
