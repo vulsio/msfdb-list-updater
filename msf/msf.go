@@ -15,7 +15,7 @@ import (
 	"github.com/vulsio/msfdb-list-updater/utils"
 )
 
-// MsfModule :
+// MsfModule : Structure that stores information to be acquired.
 type MsfModule struct {
 	Name        string   `json:",omitempty"`
 	Title       string   `json:",omitempty"`
@@ -42,14 +42,14 @@ var (
 	refURLRegexp   = regexp.MustCompile(`['|\"]URL['|\"],\s['|\"](\S+)['|\"]`)
 )
 
-// Config :
+// Config : Config parameters used in Git.
 type Config struct {
 	GitClient   git.Operations
 	CacheDir    string
 	VulnListDir string
 }
 
-// Update :
+// Update : Clone msf to the cache directory and search for the module recursively.
 func (c Config) Update() (err error) {
 	log.Infof("Fetching Metasploit framework...")
 	repoDir = filepath.Join(c.CacheDir, "metasploit-framework")
@@ -112,7 +112,7 @@ func WalkDirTree(root string) error {
 	return nil
 }
 
-// Parse :
+// Parse : Extracts information from update_info of module as a regular expression.
 func Parse(file []byte, path string) (module *MsfModule, err error) {
 	module = &MsfModule{}
 
