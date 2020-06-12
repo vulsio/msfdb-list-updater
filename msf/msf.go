@@ -15,14 +15,14 @@ import (
 	"github.com/vulsio/msfdb-list-updater/utils"
 )
 
-// MsfModule : Structure that stores information to be acquired.
-type MsfModule struct {
-	Name        string   `json:",omitempty"`
-	Title       string   `json:",omitempty"`
+// Module : Structure that stores information to be acquired.
+type Module struct {
+	Name        string
+	Title       string
 	Discription string   `json:",omitempty"`
 	CveIDs      []string `json:",omitempty"`
 	EdbIDs      []string `json:",omitempty"`
-	RefURLs     []string `json:",omitempty"`
+	References  []string `json:",omitempty"`
 }
 
 const (
@@ -39,7 +39,7 @@ var (
 	summaryRegexp3 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*['|\"|\(]([\s\S]*?)['|\"|\)],\n`)
 	cveIDRegexp    = regexp.MustCompile(`['|\"]CVE['|\"],\s['|\"](\d{4})-(\d+)['|\"]`)
 	edbIDRegexp    = regexp.MustCompile(`['|\"]EDB['|\"],\s['|\"](\d+)['|\"]`)
-	refURLRegexp   = regexp.MustCompile(`['|\"]URL['|\"],\s['|\"](\S+)['|\"]`)
+	refRegexp      = regexp.MustCompile(`['|\"]URL['|\"],\s['|\"](\S+)['|\"]`)
 )
 
 // Config : Config parameters used in Git.
@@ -113,13 +113,8 @@ func WalkDirTree(root string) error {
 }
 
 // Parse : Extracts information from update_info of module as a regular expression.
-func Parse(file []byte, path string) (module *MsfModule, err error) {
-	module = &MsfModule{}
-
-	// module name
-	module.Name = filepath.Base(path)
-
-	// module title
+func Parse(file []byte, path string) (*Module, error) {
+	// Title
 	var title string
 	titleMatches := titleRegex.FindAllSubmatch(file, -1)
 	for _, m := range titleMatches {
@@ -127,10 +122,9 @@ func Parse(file []byte, path string) (module *MsfModule, err error) {
 			title = fmt.Sprintf("%s", m[1])
 		}
 	}
-	module.Title = title
 
-	// module discription
-	var summary string
+	// Discription
+	var decs string
 	var s []string
 	regxps := []*regexp.Regexp{
 		summaryRegexp1,
@@ -138,23 +132,22 @@ func Parse(file []byte, path string) (module *MsfModule, err error) {
 		summaryRegexp3,
 	}
 	for _, re := range regxps {
-		summaryMatches := re.FindAllSubmatch(file, -1)
-		for _, m := range summaryMatches {
+		decsMatches := re.FindAllSubmatch(file, -1)
+		for _, m := range decsMatches {
 			if 1 < len(m) {
-				summary = fmt.Sprintf(`%s`, m[1])
-				lines := strings.Split(summary, "\n")
+				decs = fmt.Sprintf(`%s`, m[1])
+				lines := strings.Split(decs, "\n")
 				for _, l := range lines {
 					t := strings.Replace(strings.TrimSpace(l), "\n", "", -1)
 					s = append(s, t)
 				}
-				summary = strings.Join(s[:], " ")
-				summary = strings.TrimSpace(summary)
+				decs = strings.Join(s[:], " ")
+				decs = strings.TrimSpace(decs)
 			}
 		}
 	}
-	module.Discription = summary
 
-	// module cves
+	// Cve id
 	var cveIDs []string
 	cveMatches := cveIDRegexp.FindAllSubmatch(file, -1)
 	for _, m := range cveMatches {
@@ -163,9 +156,8 @@ func Parse(file []byte, path string) (module *MsfModule, err error) {
 			cveIDs = append(cveIDs, cveID)
 		}
 	}
-	module.CveIDs = cveIDs
 
-	// module exploitdb
+	// Exploitdb unique id
 	var edbIDs []string
 	edbMatches := edbIDRegexp.FindAllSubmatch(file, -1)
 	for _, m := range edbMatches {
@@ -174,18 +166,23 @@ func Parse(file []byte, path string) (module *MsfModule, err error) {
 			edbIDs = append(edbIDs, edbID)
 		}
 	}
-	module.EdbIDs = edbIDs
 
-	// module Referenses
-	var refURLs []string
-	urlMatches := refURLRegexp.FindAllSubmatch(file, -1)
+	// Referenses
+	var links []string
+	urlMatches := refRegexp.FindAllSubmatch(file, -1)
 	for _, m := range urlMatches {
 		if 1 < len(m) {
-			url := fmt.Sprintf("%s", m[1])
-			refURLs = append(refURLs, url)
+			u := fmt.Sprintf("%s", m[1])
+			links = append(links, u)
 		}
 	}
-	module.RefURLs = refURLs
 
-	return module, nil
+	return &Module{
+		Name:        filepath.Base(path),
+		Title:       title,
+		Discription: decs,
+		CveIDs:      cveIDs,
+		EdbIDs:      edbIDs,
+		References:  links,
+	}, nil
 }
