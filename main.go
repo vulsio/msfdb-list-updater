@@ -27,7 +27,9 @@ var (
 func main() {
 	if err := run(); err != nil {
 		log.Fatalf("%s", err)
+		os.Exit(1)
 	}
+	os.Exit(0)
 }
 
 func run() error {
