@@ -38,7 +38,15 @@ var (
 	summaryRegexp3 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*['|\"|\(]([\s\S]*?)['|\"|\)],\n`)
 	cveIDRegexp    = regexp.MustCompile(`['|\"]CVE['|\"],\s['|\"](\d{4})-(\d+)['|\"]`)
 	edbIDRegexp    = regexp.MustCompile(`['|\"]EDB['|\"],\s['|\"](\d+)['|\"]`)
-	refRegexp      = regexp.MustCompile(`['|\"]URL['|\"],\s['|\"](\S+)['|\"]`)
+	// osvdbRegexp  = regexp.MustCompile(`['|\"](OSVDB)['|\"],\s['|\"](\d+)['|\"]`)  // http://osvdb.org is closed
+	cweRegexp    = regexp.MustCompile(`['|\"](CWE)['|\"],\s['|\"](\d+)['|\"]`)
+	bidRegexp    = regexp.MustCompile(`['|\"](BID)['|\"],\s['|\"](\d+)['|\"]"`)
+	zdiRegexp    = regexp.MustCompile(`['|\"](ZDI)['|\"],\s['|\"](\d{2}-\d+)['|\"]`)
+	msbRegexp    = regexp.MustCompile(`['|\"](MSB)['|\"],\s['|\"](MS\d{2}-\d+)['|\"]`)
+	wpvdbRegexp  = regexp.MustCompile(`['|\"](WPVDB)['|\"],\s['|\"](\d+)['|\"]`)
+	uscertRegexp = regexp.MustCompile(`['|\"](US-CERT-VU)['|\"],\s['|\"](\d+)['|\"]`)
+	packetRegexp = regexp.MustCompile(`['|\"](PACKETSTORM)['|\"],\s['|\"](\d+)['|\"]`)
+	refRegexp    = regexp.MustCompile(`['|\"](URL)['|\"],\s['|\"](\S+)['|\"]`)
 )
 
 // Config : Config parameters used in Git.
@@ -133,18 +141,20 @@ func Parse(file []byte, path string) (*Module, error) {
 
 	// Discription
 	var decs string
-	regxps := []*regexp.Regexp{
+	decsRegxps := []*regexp.Regexp{
 		summaryRegexp1,
 		summaryRegexp2,
 		summaryRegexp3,
 	}
 	// Substitute the first of the matched elements into the decs
-	for _, re := range regxps {
+	for _, re := range decsRegxps {
 		decsMatches := re.FindAllSubmatch(file, -1)
 		for _, m := range decsMatches {
-			decs = findDescription(m)
-			if decs != "" {
-				break
+			if 1 < len(m) {
+				decs = formatDescription(m)
+				if decs != "" {
+					break
+				}
 			}
 		}
 		if decs != "" {
@@ -174,11 +184,21 @@ func Parse(file []byte, path string) (*Module, error) {
 
 	// Referenses
 	var links []string
-	urlMatches := refRegexp.FindAllSubmatch(file, -1)
-	for _, m := range urlMatches {
-		if 1 < len(m) {
-			u := fmt.Sprintf("%s", m[1])
-			links = append(links, u)
+	urlRegxps := []*regexp.Regexp{
+		cweRegexp,
+		bidRegexp,
+		zdiRegexp,
+		msbRegexp,
+		wpvdbRegexp,
+		uscertRegexp,
+		packetRegexp,
+		refRegexp,
+	}
+	for _, re := range urlRegxps {
+		urlMatches := re.FindAllSubmatch(file, -1)
+		for _, m := range urlMatches {
+			url := formatReferences(m)
+			links = append(links, url)
 		}
 	}
 
@@ -192,20 +212,42 @@ func Parse(file []byte, path string) (*Module, error) {
 	}, nil
 }
 
-func findDescription(match [][]byte) (string) {
-	var decs string
+func formatDescription(match [][]byte) string {
 	var s []string
 
-	if 1 < len(match) {
-		decs = fmt.Sprintf(`%s`, match[1])
-		lines := strings.Split(decs, "\n")
-		for _, l := range lines {
-			t := strings.Replace(strings.TrimSpace(l), "\n", "", -1)
-			s = append(s, t)
-		}
-		decs = strings.Join(s[:], " ")
-		decs = strings.TrimSpace(decs)
+	text := fmt.Sprintf(`%s`, match[1])
+	lines := strings.Split(text, "\n")
+	for _, l := range lines {
+		t := strings.Replace(strings.TrimSpace(l), "\n", "", -1)
+		s = append(s, t)
+	}
+	text = strings.Join(s[:], " ")
+	text = strings.TrimSpace(text)
+
+	return text
+}
+
+func formatReferences(match [][]byte) string {
+	var url string
+
+	switch string(match[1]) {
+	case "CWE":
+		url = fmt.Sprintf("http://cwe.mitre.org/data/definitions/%s.html", match[2])
+	case "BID":
+		url = fmt.Sprintf("http://www.securityfocus.com/bid/%s", match[2])
+	case "ZDI":
+		url = fmt.Sprintf("http://www.zerodayinitiative.com/advisories/ZDI-%s", match[2])
+	case "MSB":
+		url = fmt.Sprintf("http://technet.microsoft.com/en-us/security/bulletin/%s", match[2])
+	case "WPVDB":
+		url = fmt.Sprintf("https://wpvulndb.com/vulnerabilities/%s", match[2])
+	case "US-CERT-VU":
+		url = fmt.Sprintf("http://www.kb.cert.org/vuls/id/%s", match[2])
+	case "PACKETSTORM":
+		url = fmt.Sprintf("https://packetstormsecurity.com/files/%s", match[2])
+	case "URL":
+		url = fmt.Sprintf("%s", match[2])
 	}
 
-	return decs
+	return url
 }
