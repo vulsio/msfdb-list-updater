@@ -27,17 +27,17 @@ var (
 	summaryRegexp1 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*%q{([^}]*)}`)
 	summaryRegexp2 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*%q\(([^}]*) \),`)
 	summaryRegexp3 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*['|\"|\(]([\s\S]*?)['|\"|\)],\n`)
-	cveIDRegexp    = regexp.MustCompile(`['|\"]CVE['|\"],\s['|\"](\d{4})-(\d+)['|\"]`)
-	edbIDRegexp    = regexp.MustCompile(`['|\"]EDB['|\"],\s['|\"](\d+)['|\"]`)
+	cveIDRegexp    = regexp.MustCompile(`['|\"]CVE['|\"],\s+['|\"](\d{4})-(\d+)['|\"]`)
+	edbIDRegexp    = regexp.MustCompile(`['|\"]EDB['|\"],\s+['|\"](\d+)['|\"]`)
 	// osvdbRegexp  = regexp.MustCompile(`['|\"](OSVDB)['|\"],\s['|\"](\d+)['|\"]`)  // http://osvdb.org is closed
-	cweRegexp    = regexp.MustCompile(`['|\"](CWE)['|\"],\s['|\"](\d+)['|\"]`)
-	bidRegexp    = regexp.MustCompile(`['|\"](BID)['|\"],\s['|\"](\d+)['|\"]"`)
-	zdiRegexp    = regexp.MustCompile(`['|\"](ZDI)['|\"],\s['|\"](\d{2}-\d+)['|\"]`)
-	msbRegexp    = regexp.MustCompile(`['|\"](MSB)['|\"],\s['|\"](MS\d{2}-\d+)['|\"]`)
-	wpvdbRegexp  = regexp.MustCompile(`['|\"](WPVDB)['|\"],\s['|\"](\d+)['|\"]`)
-	uscertRegexp = regexp.MustCompile(`['|\"](US-CERT-VU)['|\"],\s['|\"](\d+)['|\"]`)
-	packetRegexp = regexp.MustCompile(`['|\"](PACKETSTORM)['|\"],\s['|\"](\d+)['|\"]`)
-	refRegexp    = regexp.MustCompile(`['|\"](URL)['|\"],\s['|\"](\S+)['|\"]`)
+	cweRegexp    = regexp.MustCompile(`['|\"](CWE)['|\"],\s+['|\"](\d+)['|\"]`)
+	bidRegexp    = regexp.MustCompile(`['|\"](BID)['|\"],\s+['|\"](\d+)['|\"]"`)
+	zdiRegexp    = regexp.MustCompile(`['|\"](ZDI)['|\"],\s+['|\"](\d{2}-\d+)['|\"]`)
+	msbRegexp    = regexp.MustCompile(`['|\"](MSB)['|\"],\s+['|\"](MS\d{2}-\d+)['|\"]`)
+	wpvdbRegexp  = regexp.MustCompile(`['|\"](WPVDB)['|\"],\s+['|\"](\d+)['|\"]`)
+	uscertRegexp = regexp.MustCompile(`['|\"](US-CERT-VU)['|\"],\s+['|\"](\d+)['|\"]`)
+	packetRegexp = regexp.MustCompile(`['|\"](PACKETSTORM)['|\"],\s+['|\"](\d+)['|\"]`)
+	refRegexp    = regexp.MustCompile(`['|\"](URL)['|\"],\s+['|\"](\S+)['|\"]`)
 )
 
 // Config : Config parameters used in Git.
@@ -146,7 +146,7 @@ func Parse(file []byte, path string) (*models.Module, error) {
 		}
 	}
 
-	// Discription
+	// Description
 	var decs string
 	decsRegxps := []*regexp.Regexp{
 		summaryRegexp1,
@@ -212,7 +212,7 @@ func Parse(file []byte, path string) (*models.Module, error) {
 	return &models.Module{
 		Name:        filepath.Base(path),
 		Title:       title,
-		Discription: decs,
+		Description: decs,
 		CveIDs:      cveIDs,
 		EdbIDs:      edbIDs,
 		References:  links,

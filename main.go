@@ -88,10 +88,10 @@ func run() error {
 		return xerrors.Errorf("failed to git commit: %w", err)
 	}
 
-	// log.Infof("git push")
-	// if err = gc.Push(utils.VulnListDir(), "master"); err != nil {
-	// 	return xerrors.Errorf("failed to git push: %w", err)
-	// }
+	log.Infof("git push")
+	if err = gc.Push(utils.VulnListDir(), "master"); err != nil {
+		return xerrors.Errorf("failed to git push: %w", err)
+	}
 
 	return nil
 }

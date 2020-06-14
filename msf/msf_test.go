@@ -20,7 +20,7 @@ func TestParse(t *testing.T) {
 			module: &models.Module{
 				Name:        "example.rb",
 				Title:       "Sample Exploit",
-				Discription: "This exploit module illustrates how a vulnerability could be exploited in an TCP server that has a parsing bug.",
+				Description: "This exploit module illustrates how a vulnerability could be exploited in an TCP server that has a parsing bug.",
 				CveIDs:      []string{"CVE-1978-1234"},
 				EdbIDs:      []string{"EDB-12345"},
 				References: []string{
@@ -33,7 +33,7 @@ func TestParse(t *testing.T) {
 			module: &models.Module{
 				Name:        "example_webapp.rb",
 				Title:       "Sample Webapp Exploit",
-				Discription: "This exploit module illustrates how a vulnerability could be exploited in a webapp.",
+				Description: "This exploit module illustrates how a vulnerability could be exploited in a webapp.",
 				CveIDs:      []string{"CVE-1978-1234"},
 				EdbIDs:      []string{"EDB-12345"},
 				References: []string{
@@ -46,7 +46,7 @@ func TestParse(t *testing.T) {
 			module: &models.Module{
 				Name:        "binder_uaf.rb",
 				Title:       "Android Binder Use-After-Free Exploit",
-				Discription: "This module exploits CVE-2019-2215, which is a use-after-free in Binder in the Android kernel. The bug is a local privilege escalation vulnerability that allows for a full compromise of a vulnerable device. If chained with a browser renderer exploit, this bug could fully compromise a device through a malicious website. The freed memory is replaced with an iovec structure in order to leak a pointer to the task_struct. Finally the bug is triggered again in order to overwrite the addr_limit, making all memory (including kernel memory) accessible as part of the user-space memory range in our process and allowing arbitrary reading and writing of kernel memory.",
+				Description: "This module exploits CVE-2019-2215, which is a use-after-free in Binder in the Android kernel. The bug is a local privilege escalation vulnerability that allows for a full compromise of a vulnerable device. If chained with a browser renderer exploit, this bug could fully compromise a device through a malicious website. The freed memory is replaced with an iovec structure in order to leak a pointer to the task_struct. Finally the bug is triggered again in order to overwrite the addr_limit, making all memory (including kernel memory) accessible as part of the user-space memory range in our process and allowing arbitrary reading and writing of kernel memory.",
 				CveIDs:      []string{"CVE-2019-2215"},
 				References: []string{
 					"https://bugs.chromium.org/p/project-zero/issues/detail?id=1942",
@@ -61,7 +61,7 @@ func TestParse(t *testing.T) {
 			module: &models.Module{
 				Name:        "example.rb",
 				Title:       "Sample Auxiliary Module",
-				Discription: "Sample Auxiliary Module",
+				Description: "Sample Auxiliary Module",
 			},
 		},
 		{
@@ -69,7 +69,7 @@ func TestParse(t *testing.T) {
 			module: &models.Module{
 				Name:        "openemr_sqli_dump.rb",
 				Title:       "OpenEMR 5.0.1 Patch 6 SQLi Dump",
-				Discription: "This module exploits a SQLi vulnerability found in OpenEMR version 5.0.1 Patch 6 and lower. The vulnerability allows the contents of the entire database (with exception of log and task tables) to be extracted. This module saves each table as a `.csv` file in your loot directory and has been tested with OpenEMR 5.0.1 (3).",
+				Description: "This module exploits a SQLi vulnerability found in OpenEMR version 5.0.1 Patch 6 and lower. The vulnerability allows the contents of the entire database (with exception of log and task tables) to be extracted. This module saves each table as a `.csv` file in your loot directory and has been tested with OpenEMR 5.0.1 (3).",
 				CveIDs:      []string{"CVE-2018-17179"},
 				References: []string{
 					"https://github.com/openemr/openemr/commit/3e22d11c7175c1ebbf3d862545ce6fee18f70617",

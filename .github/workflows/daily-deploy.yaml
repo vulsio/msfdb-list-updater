@@ -1,0 +1,25 @@
+name: daily-deploy
+on:
+  schedule:
+    - cron:  '0 0 * * *'
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14.x
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Release msfdb-list
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          go run main.go -target msf
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

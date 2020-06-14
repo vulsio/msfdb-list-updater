@@ -4,7 +4,7 @@ package models
 type Module struct {
 	Name        string
 	Title       string
-	Discription string   `json:",omitempty"`
+	Description string   `json:",omitempty"`
 	CveIDs      []string `json:",omitempty"`
 	EdbIDs      []string `json:",omitempty"`
 	References  []string `json:",omitempty"`
