@@ -45,7 +45,7 @@ func run() error {
 	githubToken := os.Getenv("GITHUB_TOKEN")
 	url := fmt.Sprintf(repoURL, githubToken, repoOwner, repoName)
 
-	log.Infof("Target repository is %s/%s", repoOwner, repoName)
+	log.Infof("Target repository    : %s/%s", repoOwner, repoName)
 
 	if _, err := gc.CloneOrPull(url, utils.VulnListDir()); err != nil {
 		return xerrors.Errorf("clone or pull error: %w", err)
@@ -79,7 +79,7 @@ func run() error {
 
 	// only last_updated.json
 	if len(files) < 2 {
-		log.Infof("Skip commit and push")
+		log.Infof("skip commit & push")
 		return nil
 	}
 
@@ -88,7 +88,7 @@ func run() error {
 		return xerrors.Errorf("failed to git commit: %w", err)
 	}
 
-	// log.Println("git push")
+	// log.Infof("git push")
 	// if err = gc.Push(utils.VulnListDir(), "master"); err != nil {
 	// 	return xerrors.Errorf("failed to git push: %w", err)
 	// }

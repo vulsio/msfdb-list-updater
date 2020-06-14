@@ -12,18 +12,9 @@ import (
 
 	"github.com/vulsio/msfdb-list-updater/git"
 	log "github.com/vulsio/msfdb-list-updater/log"
+	"github.com/vulsio/msfdb-list-updater/models"
 	"github.com/vulsio/msfdb-list-updater/utils"
 )
-
-// Module : Structure that stores information to be acquired.
-type Module struct {
-	Name        string
-	Title       string
-	Discription string   `json:",omitempty"`
-	CveIDs      []string `json:",omitempty"`
-	EdbIDs      []string `json:",omitempty"`
-	References  []string `json:",omitempty"`
-}
 
 const (
 	repoURL = "https://github.com/rapid7/metasploit-framework.git"
@@ -64,7 +55,23 @@ func (c Config) Update() (err error) {
 		return xerrors.Errorf("failed to clone metasploit-framework repository: %w", err)
 	}
 
-	log.Infof("Walking modules...")
+	log.Infof("Initialize directory...")
+	listDir := filepath.Join(utils.VulnListDir(), msfDir)
+	exists, err := utils.Exists(listDir)
+	if err != nil {
+		log.Errorf("%s", err)
+		return err
+	}
+
+	if exists {
+		err := os.RemoveAll(listDir)
+		if err != nil {
+			log.Errorf("%s", err)
+			return err
+		}
+	}
+
+	log.Infof("Parsing modules...")
 	for _, target := range []string{"modules/auxiliary", "modules/exploits"} {
 		moduleList, err := WalkDirTree(filepath.Join(repoDir, target))
 		if err != nil {
@@ -85,8 +92,8 @@ func (c Config) Update() (err error) {
 }
 
 // WalkDirTree :
-func WalkDirTree(root string) ([]Module, error) {
-	modules := []Module{}
+func WalkDirTree(root string) ([]models.Module, error) {
+	modules := []models.Module{}
 
 	err := filepath.Walk(root,
 		func(path string, info os.FileInfo, err error) error {
@@ -127,7 +134,7 @@ func WalkDirTree(root string) ([]Module, error) {
 }
 
 // Parse : Extracts information from update_info of module as a regular expression.
-func Parse(file []byte, path string) (*Module, error) {
+func Parse(file []byte, path string) (*models.Module, error) {
 	// Title
 	var title string
 	titleMatches := titleRegex.FindAllSubmatch(file, -1)
@@ -202,7 +209,7 @@ func Parse(file []byte, path string) (*Module, error) {
 		}
 	}
 
-	return &Module{
+	return &models.Module{
 		Name:        filepath.Base(path),
 		Title:       title,
 		Discription: decs,

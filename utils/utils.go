@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -11,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vulsio/msfdb-list-updater/models"
 	"golang.org/x/xerrors"
 )
 
@@ -89,7 +91,12 @@ func SaveCVEPerYear(dirName string, cveID string, data interface{}) error {
 	}
 
 	filePath := filepath.Join(yearDir, fmt.Sprintf("%s.json", cveID))
-	if err := Write(filePath, data); err != nil {
+	datas, err := ConvertModels(filePath, data)
+	if err != nil {
+		return err
+	}
+
+	if err := Write(filePath, datas); err != nil {
 		return xerrors.Errorf("failed to write file: %w", err)
 	}
 	return nil
@@ -117,4 +124,45 @@ func Write(filePath string, data interface{}) error {
 		return err
 	}
 	return nil
+}
+
+// Read :
+func Read(filePath string) (models.Modules, error) {
+	f, err := os.OpenFile(filePath, os.O_RDONLY, 0644)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+
+	var datas models.Modules
+	err = json.Unmarshal(b, &datas)
+	if err != nil {
+		return nil, err
+	}
+
+	return datas, nil
+}
+
+// ConvertModels :
+func ConvertModels(filePath string, data interface{}) (models.Modules, error) {
+	exists, err := Exists(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	var datas models.Modules
+	if exists {
+		datas, err = Read(filePath)
+		if err != nil {
+			return nil, err
+		}
+	}
+	datas = append(datas, data.(models.Module))
+
+	return datas, nil
 }

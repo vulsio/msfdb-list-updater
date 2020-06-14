@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/vulsio/msfdb-list-updater/models"
 	"github.com/vulsio/msfdb-list-updater/msf"
 )
 
@@ -16,7 +17,7 @@ func TestParse(t *testing.T) {
 	}{
 		{
 			file: "testdata/metasploit-framework/modules/exploits/example.rb",
-			module: &msf.Module{
+			module: &models.Module{
 				Name:        "example.rb",
 				Title:       "Sample Exploit",
 				Discription: "This exploit module illustrates how a vulnerability could be exploited in an TCP server that has a parsing bug.",
@@ -29,7 +30,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			file: "testdata/metasploit-framework/modules/exploits/example_webapp.rb",
-			module: &msf.Module{
+			module: &models.Module{
 				Name:        "example_webapp.rb",
 				Title:       "Sample Webapp Exploit",
 				Discription: "This exploit module illustrates how a vulnerability could be exploited in a webapp.",
@@ -42,7 +43,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			file: "testdata/metasploit-framework/modules/exploits/android/local/binder_uaf.rb",
-			module: &msf.Module{
+			module: &models.Module{
 				Name:        "binder_uaf.rb",
 				Title:       "Android Binder Use-After-Free Exploit",
 				Discription: "This module exploits CVE-2019-2215, which is a use-after-free in Binder in the Android kernel. The bug is a local privilege escalation vulnerability that allows for a full compromise of a vulnerable device. If chained with a browser renderer exploit, this bug could fully compromise a device through a malicious website. The freed memory is replaced with an iovec structure in order to leak a pointer to the task_struct. Finally the bug is triggered again in order to overwrite the addr_limit, making all memory (including kernel memory) accessible as part of the user-space memory range in our process and allowing arbitrary reading and writing of kernel memory.",
@@ -57,7 +58,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			file: "testdata/metasploit-framework/modules/auxiliary/example.rb",
-			module: &msf.Module{
+			module: &models.Module{
 				Name:        "example.rb",
 				Title:       "Sample Auxiliary Module",
 				Discription: "Sample Auxiliary Module",
@@ -65,7 +66,7 @@ func TestParse(t *testing.T) {
 		},
 		{
 			file: "testdata/metasploit-framework/modules/auxiliary/sqli/openemr/openemr_sqli_dump.rb",
-			module: &msf.Module{
+			module: &models.Module{
 				Name:        "openemr_sqli_dump.rb",
 				Title:       "OpenEMR 5.0.1 Patch 6 SQLi Dump",
 				Discription: "This module exploits a SQLi vulnerability found in OpenEMR version 5.0.1 Patch 6 and lower. The vulnerability allows the contents of the entire database (with exception of log and task tables) to be extracted. This module saves each table as a `.csv` file in your loot directory and has been tested with OpenEMR 5.0.1 (3).",

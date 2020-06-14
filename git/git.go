@@ -33,7 +33,7 @@ func (gc Config) CloneOrPull(url, repoPath string) (map[string]struct{}, error) 
 
 	updatedFiles := map[string]struct{}{}
 	if exists {
-		log.Infof("git pull --> %s", repoPath)
+		log.Infof("git pull             : %s", repoPath)
 		files, err := pull(url, repoPath)
 		if err != nil {
 			return nil, xerrors.Errorf("git pull error: %w", err)
@@ -43,7 +43,7 @@ func (gc Config) CloneOrPull(url, repoPath string) (map[string]struct{}, error) 
 			updatedFiles[strings.TrimSpace(filename)] = struct{}{}
 		}
 	} else {
-		log.Infof("git clone --> %s", repoPath)
+		log.Infof("git clone            : %s", repoPath)
 		if err = os.MkdirAll(repoPath, 0700); err != nil {
 			return nil, err
 		}
