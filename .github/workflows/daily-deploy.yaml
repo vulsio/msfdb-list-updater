@@ -26,4 +26,4 @@ jobs:
           git config --global user.name "GitHub Action"
           go run main.go -target msf
         env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
