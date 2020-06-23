@@ -1,8 +1,11 @@
 name: daily-deploy
 on:
   push:
+    branches:
+    - master
   schedule:
     - cron:  '0 0 * * *'
+
 jobs:
   release:
     runs-on: ubuntu-latest

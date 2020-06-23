@@ -42,7 +42,7 @@ func run() error {
 	repoName := defaultRepoName
 
 	// Embed GitHub token to URL
-	githubToken := os.Getenv("GITHUB_TOKEN")
+	githubToken := os.Getenv("PERSONAL_TOKEN")
 	url := fmt.Sprintf(repoURL, githubToken, repoOwner, repoName)
 
 	log.Infof("Target repository    : %s/%s", repoOwner, repoName)
@@ -89,7 +89,7 @@ func run() error {
 	}
 
 	log.Infof("git push")
-	if err = gc.Push(utils.VulnListDir(), "master"); err != nil {
+	if err = gc.Push(url, utils.VulnListDir(), "master"); err != nil {
 		return xerrors.Errorf("failed to git push: %w", err)
 	}
 

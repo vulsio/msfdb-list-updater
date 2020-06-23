@@ -137,8 +137,13 @@ func (gc Config) Commit(repoPath, targetPath, message string) error {
 }
 
 // Push :
-func (gc Config) Push(repoPath, branch string) error {
+func (gc Config) Push(url, repoPath, branch string) error {
 	commandArgs := generateGitArgs(repoPath)
+	remoteCmd := []string{"remote", "set-url", "origin", url}
+	if _, err := utils.Exec("git", append(commandArgs, remoteCmd...)); err != nil {
+		return xerrors.Errorf("error in set-url: %w", err)
+	}
+
 	pushCmd := []string{"push", "origin", branch}
 	if _, err := utils.Exec("git", append(commandArgs, pushCmd...)); err != nil {
 		return xerrors.Errorf("error in git push: %w", err)
