@@ -2,7 +2,7 @@ name: deploy-list
 on:
   push:
     branches:
-    - dev
+      - master
   schedule:
     - cron:  '0 * * * *' # every hour
 
@@ -36,7 +36,7 @@ jobs:
           SLACK_CHANNEL: msfdb-notification
           SLACK_COLOR: '#FF6961'
           SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
-          SLACK_MESSAGE: 'Deploy failure :umbrella_with_rain_drops:'
+          SLACK_MESSAGE: 'Deploy failure :umbrella_with_rain_drops: @takuzoo3868 please check'
           SLACK_TITLE: 'msfdb-list deploy'
           SLACK_USERNAME: github_actuions
           SLACK_WEBHOOK: ${{ secrets.SLACK_TOKEN }}
