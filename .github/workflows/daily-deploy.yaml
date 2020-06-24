@@ -33,12 +33,12 @@ jobs:
         if: failure()
         uses: rtCamp/action-slack-notify@master
         env:
-          SLACK_CHANNEL: 11_github-ci
+          SLACK_CHANNEL: msfdb-notification
           SLACK_COLOR: '#FF6961'
           SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
           SLACK_MESSAGE: 'Deploy failure :umbrella_with_rain_drops:'
           SLACK_TITLE: 'msfdb-list deploy'
-          SLACK_USERNAME: ci_bot
+          SLACK_USERNAME: github_actuions
           SLACK_WEBHOOK: ${{ secrets.SLACK_TOKEN }}
       
       - name: Slack Notification Test
@@ -46,10 +46,10 @@ jobs:
         if: success()
         uses: rtCamp/action-slack-notify@master
         env:
-          SLACK_CHANNEL: 11_github-ci
+          SLACK_CHANNEL: msfdb-notification
           SLACK_COLOR: '#44D362'
           SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
           SLACK_MESSAGE: 'Deploy success :sunny:'
           SLACK_TITLE: 'msfdb-list deploy'
-          SLACK_USERNAME: ci_bot
+          SLACK_USERNAME: github_actuions
           SLACK_WEBHOOK: ${{ secrets.SLACK_TOKEN }}
