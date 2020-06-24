@@ -103,7 +103,7 @@ func SaveCVEPerYear(dirName string, cveID string, data models.Module) error {
 }
 
 // Write :
-func Write(filePath string, data interface{}) error {
+func Write(filePath string, data models.Modules) error {
 	f, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -122,7 +122,7 @@ func Write(filePath string, data interface{}) error {
 	return nil
 }
 
-func unescapeJSONMarshal(jsonRaw interface{}) ([]byte, error) {
+func unescapeJSONMarshal(jsonRaw models.Modules) ([]byte, error) {
 	buffer := &bytes.Buffer{}
 	encoder := json.NewEncoder(buffer)
 	encoder.SetEscapeHTML(false)
@@ -155,7 +155,7 @@ func Read(filePath string) (models.Modules, error) {
 }
 
 // ConvertModels :
-func ConvertModels(filePath string, data interface{}) (models.Modules, error) {
+func ConvertModels(filePath string, data models.Module) (models.Modules, error) {
 	exists, err := Exists(filePath)
 	if err != nil {
 		return nil, err
@@ -168,7 +168,7 @@ func ConvertModels(filePath string, data interface{}) (models.Modules, error) {
 			return nil, err
 		}
 	}
-	datas = append(datas, data.(models.Module))
+	datas = append(datas, data)
 
 	return datas, nil
 }
