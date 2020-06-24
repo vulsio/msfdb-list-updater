@@ -1,12 +1,8 @@
-# initialize was taken from metasploit-framework.
-# BSD-3-clause (c) 2006-2020, Rapid7, Inc.
-# (https://github.com/rapid7/metasploit-framework/blob/master/LICENSE)
-
 def initialize(info = {})
     super(
         update_info(
         info,
-        'Name'           => 'Sample Auxiliary Module',
+        'Name'           => 'Sample Auxiliary',
         # The description can be multiple lines, but does not preserve formatting.
         'Description'    => 'Sample Auxiliary Module',
         'Author'         => ['Joe Module <joem@example.com>'],

@@ -1,7 +1,3 @@
-# initialize was taken from metasploit-framework.
-# BSD-3-clause (c) 2006-2020, Rapid7, Inc.
-# (https://github.com/rapid7/metasploit-framework/blob/master/LICENSE)
-
 def initialize(info = {})
   super(
     update_info(
@@ -16,13 +12,21 @@ def initialize(info = {})
         in an TCP server that has a parsing bug.
       ),
       'License'        => MSF_LICENSE,
-      'Author'         => ['skape'],
+      'Author'         => ['John Doe'],
       'References'     =>
         [
           [ 'OSVDB', '12345' ],
           [ 'EDB', '12345' ],
           [ 'URL', 'http://www.example.com'],
           [ 'CVE', '1978-1234']
+          [ 'CVE', '1978-5678']
+          [ 'CWE', '123']
+          [ 'BID', '12345']
+          [ 'ZDI', '12-345']
+          [ 'MSB', 'MS12-345']
+          [ 'WPVDB', '12345']
+          [ 'US-CERT-VU', '12345']
+          [ 'PACKETSTORM', '12345']
         ],
       'Payload'        =>
         {

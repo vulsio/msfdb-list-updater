@@ -31,7 +31,7 @@ var (
 	edbIDRegexp    = regexp.MustCompile(`['|\"]EDB['|\"],\s+['|\"](\d+)['|\"]`)
 	// osvdbRegexp  = regexp.MustCompile(`['|\"](OSVDB)['|\"],\s['|\"](\d+)['|\"]`)  // http://osvdb.org is closed
 	cweRegexp    = regexp.MustCompile(`['|\"](CWE)['|\"],\s+['|\"](\d+)['|\"]`)
-	bidRegexp    = regexp.MustCompile(`['|\"](BID)['|\"],\s+['|\"](\d+)['|\"]"`)
+	bidRegexp    = regexp.MustCompile(`['|\"](BID)['|\"],\s+['|\"](\d+)['|\"]`)
 	zdiRegexp    = regexp.MustCompile(`['|\"](ZDI)['|\"],\s+['|\"](\d{2}-\d+)['|\"]`)
 	msbRegexp    = regexp.MustCompile(`['|\"](MSB)['|\"],\s+['|\"](MS\d{2}-\d+)['|\"]`)
 	wpvdbRegexp  = regexp.MustCompile(`['|\"](WPVDB)['|\"],\s+['|\"](\d+)['|\"]`)

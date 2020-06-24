@@ -16,35 +16,44 @@ func TestParse(t *testing.T) {
 		module interface{}
 	}{
 		{
-			file: "testdata/metasploit-framework/modules/exploits/example.rb",
+			file: "testdata/test_000.rb",
 			module: &models.Module{
-				Name:        "example.rb",
+				Name:  "test_000.rb",
+				Title: "Sample Module",
+			},
+		},
+		{
+			file: "testdata/test_001.rb",
+			module: &models.Module{
+				Name:        "test_001.rb",
 				Title:       "Sample Exploit",
 				Description: "This exploit module illustrates how a vulnerability could be exploited in an TCP server that has a parsing bug.",
-				CveIDs:      []string{"CVE-1978-1234"},
+				CveIDs:      []string{"CVE-1978-1234", "CVE-1978-5678"},
 				EdbIDs:      []string{"EDB-12345"},
 				References: []string{
+					"http://cwe.mitre.org/data/definitions/123.html",
+					"http://www.securityfocus.com/bid/12345",
+					"http://www.zerodayinitiative.com/advisories/ZDI-12-345",
+					"http://technet.microsoft.com/en-us/security/bulletin/MS12-345",
+					"https://wpvulndb.com/vulnerabilities/12345",
+					"http://www.kb.cert.org/vuls/id/12345",
+					"https://packetstormsecurity.com/files/12345",
 					"http://www.example.com",
 				},
 			},
 		},
 		{
-			file: "testdata/metasploit-framework/modules/exploits/example_webapp.rb",
+			file: "testdata/test_002.rb",
 			module: &models.Module{
-				Name:        "example_webapp.rb",
-				Title:       "Sample Webapp Exploit",
-				Description: "This exploit module illustrates how a vulnerability could be exploited in a webapp.",
-				CveIDs:      []string{"CVE-1978-1234"},
-				EdbIDs:      []string{"EDB-12345"},
-				References: []string{
-					"http://www.example.com",
-				},
+				Name:        "test_002.rb",
+				Title:       "Sample Auxiliary",
+				Description: "Sample Auxiliary Module",
 			},
 		},
 		{
-			file: "testdata/metasploit-framework/modules/exploits/android/local/binder_uaf.rb",
+			file: "testdata/test_003.rb",
 			module: &models.Module{
-				Name:        "binder_uaf.rb",
+				Name:        "test_003.rb",
 				Title:       "Android Binder Use-After-Free Exploit",
 				Description: "This module exploits CVE-2019-2215, which is a use-after-free in Binder in the Android kernel. The bug is a local privilege escalation vulnerability that allows for a full compromise of a vulnerable device. If chained with a browser renderer exploit, this bug could fully compromise a device through a malicious website. The freed memory is replaced with an iovec structure in order to leak a pointer to the task_struct. Finally the bug is triggered again in order to overwrite the addr_limit, making all memory (including kernel memory) accessible as part of the user-space memory range in our process and allowing arbitrary reading and writing of kernel memory.",
 				CveIDs:      []string{"CVE-2019-2215"},
@@ -57,17 +66,9 @@ func TestParse(t *testing.T) {
 			},
 		},
 		{
-			file: "testdata/metasploit-framework/modules/auxiliary/example.rb",
+			file: "testdata/test_004.rb",
 			module: &models.Module{
-				Name:        "example.rb",
-				Title:       "Sample Auxiliary Module",
-				Description: "Sample Auxiliary Module",
-			},
-		},
-		{
-			file: "testdata/metasploit-framework/modules/auxiliary/sqli/openemr/openemr_sqli_dump.rb",
-			module: &models.Module{
-				Name:        "openemr_sqli_dump.rb",
+				Name:        "test_004.rb",
 				Title:       "OpenEMR 5.0.1 Patch 6 SQLi Dump",
 				Description: "This module exploits a SQLi vulnerability found in OpenEMR version 5.0.1 Patch 6 and lower. The vulnerability allows the contents of the entire database (with exception of log and task tables) to be extracted. This module saves each table as a `.csv` file in your loot directory and has been tested with OpenEMR 5.0.1 (3).",
 				CveIDs:      []string{"CVE-2018-17179"},
