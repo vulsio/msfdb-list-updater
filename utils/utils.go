@@ -110,20 +110,26 @@ func Write(filePath string, data interface{}) error {
 	}
 	defer f.Close()
 
-	b, err := json.MarshalIndent(data, "", "  ")
+	b, err := unescapeJSONMarshal(data)
 	if err != nil {
 		return err
 	}
-
-	b = bytes.Replace(b, []byte("\\u003c"), []byte("<"), -1)
-	b = bytes.Replace(b, []byte("\\u003e"), []byte(">"), -1)
-	b = bytes.Replace(b, []byte("\\u0026"), []byte("&"), -1)
 
 	_, err = f.Write(b)
 	if err != nil {
 		return err
 	}
 	return nil
+}
+
+func unescapeJSONMarshal(jsonRaw interface{}) ([]byte, error) {
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+	encoder.SetIndent("", "  ")
+
+	err := encoder.Encode(jsonRaw)
+	return buffer.Bytes(), err
 }
 
 // Read :
