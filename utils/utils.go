@@ -79,7 +79,7 @@ func LookupEnv(key, defaultValue string) string {
 }
 
 // SaveCVEPerYear :
-func SaveCVEPerYear(dirName string, cveID string, data interface{}) error {
+func SaveCVEPerYear(dirName string, cveID string, data models.Module) error {
 	s := strings.Split(cveID, "-")
 	if len(s) != 3 {
 		return xerrors.Errorf("invalid CVE-ID format: %s\n", cveID)
