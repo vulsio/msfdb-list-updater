@@ -1,6 +1,7 @@
 package msf
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -158,7 +159,7 @@ func Parse(file []byte, path string) (*models.Module, error) {
 		decsMatches := re.FindAllSubmatch(file, -1)
 		for _, m := range decsMatches {
 			if 1 < len(m) {
-				decs = formatDescription(m)
+				decs = FormatDescription(string(m[1]))
 				if decs != "" {
 					break
 				}
@@ -204,7 +205,7 @@ func Parse(file []byte, path string) (*models.Module, error) {
 	for _, re := range urlRegxps {
 		urlMatches := re.FindAllSubmatch(file, -1)
 		for _, m := range urlMatches {
-			url := formatReferences(m)
+			url := FormatReferences(string(m[1]), string(m[2]))
 			links = append(links, url)
 		}
 	}
@@ -219,41 +220,38 @@ func Parse(file []byte, path string) (*models.Module, error) {
 	}, nil
 }
 
-func formatDescription(match [][]byte) string {
-	var s []string
-
-	text := fmt.Sprintf(`%s`, match[1])
-	lines := strings.Split(text, "\n")
-	for _, l := range lines {
-		t := strings.Replace(strings.TrimSpace(l), "\n", "", -1)
-		s = append(s, t)
+// FormatDescription :
+func FormatDescription(desc string) string {
+	ss := []string{}
+	scanner := bufio.NewScanner(strings.NewReader(desc))
+	for scanner.Scan() {
+		s := strings.TrimSpace(scanner.Text())
+		ss = append(ss, s)
 	}
-	text = strings.Join(s[:], " ")
-	text = strings.TrimSpace(text)
-
-	return text
+	return strings.TrimSpace(strings.Join(ss, " "))
 }
 
-func formatReferences(match [][]byte) string {
+// FormatReferences :
+func FormatReferences(refType string, refID string) string {
 	var url string
 
-	switch string(match[1]) {
+	switch string(refType) {
 	case "CWE":
-		url = fmt.Sprintf("http://cwe.mitre.org/data/definitions/%s.html", match[2])
+		url = fmt.Sprintf("http://cwe.mitre.org/data/definitions/%s.html", refID)
 	case "BID":
-		url = fmt.Sprintf("http://www.securityfocus.com/bid/%s", match[2])
+		url = fmt.Sprintf("http://www.securityfocus.com/bid/%s", refID)
 	case "ZDI":
-		url = fmt.Sprintf("http://www.zerodayinitiative.com/advisories/ZDI-%s", match[2])
+		url = fmt.Sprintf("http://www.zerodayinitiative.com/advisories/ZDI-%s", refID)
 	case "MSB":
-		url = fmt.Sprintf("http://technet.microsoft.com/en-us/security/bulletin/%s", match[2])
+		url = fmt.Sprintf("http://technet.microsoft.com/en-us/security/bulletin/%s", refID)
 	case "WPVDB":
-		url = fmt.Sprintf("https://wpvulndb.com/vulnerabilities/%s", match[2])
+		url = fmt.Sprintf("https://wpvulndb.com/vulnerabilities/%s", refID)
 	case "US-CERT-VU":
-		url = fmt.Sprintf("http://www.kb.cert.org/vuls/id/%s", match[2])
+		url = fmt.Sprintf("http://www.kb.cert.org/vuls/id/%s", refID)
 	case "PACKETSTORM":
-		url = fmt.Sprintf("https://packetstormsecurity.com/files/%s", match[2])
+		url = fmt.Sprintf("https://packetstormsecurity.com/files/%s", refID)
 	case "URL":
-		url = fmt.Sprintf("%s", match[2])
+		url = refID
 	}
 
 	return url

@@ -92,8 +92,75 @@ func TestParse(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(module, v.module) {
-				t.Errorf("\ngot:\n%#v,\nwant:\n%#v", module, v.module)
+				t.Errorf("\n got:\n%#v\nwant:\n%#v", module, v.module)
 			}
 		})
+	}
+}
+
+func TestFormatDescription(t *testing.T) {
+	var tests = []struct {
+		in  string
+		out string
+	}{
+		{
+			"",
+			"",
+		},
+		{
+			"text text",
+			"text text",
+		},
+		{
+			" text\n  text\n  text",
+			"text text text",
+		},
+		{
+			"\ttext\n \ttext\n \ttext\t",
+			"text text text",
+		},
+	}
+
+	for _, tt := range tests {
+		actual := msf.FormatDescription(tt.in)
+		if actual != tt.out {
+			t.Errorf("\n got: %s\nwant: %s", tt.out, actual)
+		}
+	}
+}
+
+func TestFormatReferences(t *testing.T) {
+	var tests = []struct {
+		inType string
+		inID   string
+		out    string
+	}{
+		{
+			"",
+			"",
+			"",
+		},
+		{
+			"URL",
+			"https://github.com/",
+			"https://github.com/",
+		},
+		{
+			"MSB",
+			"MS12-345",
+			"http://technet.microsoft.com/en-us/security/bulletin/MS12-345",
+		},
+		{
+			"INVALID",
+			"https://github.com/",
+			"",
+		},
+	}
+
+	for _, tt := range tests {
+		actual := msf.FormatReferences(tt.inType, tt.inID)
+		if actual != tt.out {
+			t.Errorf("\n got: %s\nwant: %s", tt.out, actual)
+		}
 	}
 }
