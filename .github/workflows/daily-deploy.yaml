@@ -1,0 +1,55 @@
+name: deploy-list
+on:
+  push:
+    branches:
+      - master
+  schedule:
+    - cron:  '0 * * * *' # every hour
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.14.x
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v2
+
+      - name: Release msfdb-list
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          go run main.go -target msf
+        env:
+          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+      
+      - name: Slack Notification
+        # success() or failure() or always()
+        if: failure()
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_CHANNEL: msfdb-notification
+          SLACK_COLOR: '#FF6961'
+          SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          SLACK_MESSAGE: 'Deploy failure :umbrella_with_rain_drops: @takuzoo3868 please check'
+          SLACK_TITLE: 'msfdb-list deploy'
+          SLACK_USERNAME: github_actuions
+          SLACK_WEBHOOK: ${{ secrets.SLACK_TOKEN }}
+      
+      - name: Slack Notification Test
+        # success() or failure() or always()
+        if: success()
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_CHANNEL: msfdb-notification
+          SLACK_COLOR: '#44D362'
+          SLACK_ICON: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          SLACK_MESSAGE: 'Deploy success :sunny:'
+          SLACK_TITLE: 'msfdb-list deploy'
+          SLACK_USERNAME: github_actuions
+          SLACK_WEBHOOK: ${{ secrets.SLACK_TOKEN }}
