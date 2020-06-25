@@ -225,10 +225,11 @@ func FormatDescription(desc string) string {
 	ss := []string{}
 	scanner := bufio.NewScanner(strings.NewReader(desc))
 	for scanner.Scan() {
-		s := strings.TrimSpace(scanner.Text())
-		ss = append(ss, s)
+		if s := strings.TrimSpace(scanner.Text()); s != "" {
+			ss = append(ss, s)
+		}
 	}
-	return strings.TrimSpace(strings.Join(ss, " "))
+	return strings.Join(ss, " ")
 }
 
 // FormatReferences :
