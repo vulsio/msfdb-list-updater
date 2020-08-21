@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -210,6 +211,10 @@ func Parse(file []byte, path string) (*models.Module, error) {
 		}
 	}
 
+	// Module Repository URL
+	moduleURL := FormatModuleURL(path)
+	links = append(links, moduleURL)
+
 	return &models.Module{
 		Name:        filepath.Base(path),
 		Title:       title,
@@ -256,4 +261,14 @@ func FormatReferences(refType string, refID string) string {
 	}
 
 	return url
+}
+
+// FormatModuleURL :
+func FormatModuleURL(path string) string {
+	// remove cache dir strings
+	s := strings.SplitAfter(path, "metasploit-framework")
+	u, _ := url.Parse("https://github.com/rapid7/metasploit-framework/blob/master")
+	u.Path = filepath.Join(u.Path, s[len(s)-1])
+
+	return u.String()
 }
