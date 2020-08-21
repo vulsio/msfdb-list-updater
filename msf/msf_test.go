@@ -188,6 +188,10 @@ func TestFormatModuleURL(t *testing.T) {
 			"https://github.com/rapid7/metasploit-framework/blob/master/modules/example.rb",
 		},
 		{
+			"/home/runner/.cache/msfdb-list-updater/metasploit-framework/modules/example.rb",
+			"https://github.com/rapid7/metasploit-framework/blob/master/modules/example.rb",
+		},
+		{
 			"modules/example.rb",
 			"https://github.com/rapid7/metasploit-framework/blob/master/modules/example.rb",
 		},
