@@ -20,6 +20,9 @@ func TestParse(t *testing.T) {
 			module: &models.Module{
 				Name:  "test_000.rb",
 				Title: "Sample Module",
+				References: []string{
+					"https://github.com/rapid7/metasploit-framework/blob/master/testdata/test_000.rb",
+				},
 			},
 		},
 		{
@@ -39,6 +42,7 @@ func TestParse(t *testing.T) {
 					"http://www.kb.cert.org/vuls/id/12345",
 					"https://packetstormsecurity.com/files/12345",
 					"http://www.example.com",
+					"https://github.com/rapid7/metasploit-framework/blob/master/testdata/test_001.rb",
 				},
 			},
 		},
@@ -48,6 +52,9 @@ func TestParse(t *testing.T) {
 				Name:        "test_002.rb",
 				Title:       "Sample Auxiliary",
 				Description: "Sample Auxiliary Module",
+				References: []string{
+					"https://github.com/rapid7/metasploit-framework/blob/master/testdata/test_002.rb",
+				},
 			},
 		},
 		{
@@ -62,6 +69,7 @@ func TestParse(t *testing.T) {
 					"https://googleprojectzero.blogspot.com/2019/11/bad-binder-android-in-wild-exploit.html",
 					"https://hernan.de/blog/2019/10/15/tailoring-cve-2019-2215-to-achieve-root/",
 					"https://github.com/grant-h/qu1ckr00t/blob/master/native/poc.c",
+					"https://github.com/rapid7/metasploit-framework/blob/master/testdata/test_003.rb",
 				},
 			},
 		},
@@ -74,6 +82,7 @@ func TestParse(t *testing.T) {
 				CveIDs:      []string{"CVE-2018-17179"},
 				References: []string{
 					"https://github.com/openemr/openemr/commit/3e22d11c7175c1ebbf3d862545ce6fee18f70617",
+					"https://github.com/rapid7/metasploit-framework/blob/master/testdata/test_004.rb",
 				},
 			},
 		},
@@ -159,6 +168,33 @@ func TestFormatReferences(t *testing.T) {
 
 	for _, tt := range tests {
 		actual := msf.FormatReferences(tt.inType, tt.inID)
+		if actual != tt.out {
+			t.Errorf("\n got: %s\nwant: %s", tt.out, actual)
+		}
+	}
+}
+
+func TestFormatModuleURL(t *testing.T) {
+	var tests = []struct {
+		in  string
+		out string
+	}{
+		{
+			"",
+			"https://github.com/rapid7/metasploit-framework/blob/master",
+		},
+		{
+			"User/Caches/msfdb-list-updater/metasploit-framework/modules/example.rb",
+			"https://github.com/rapid7/metasploit-framework/blob/master/modules/example.rb",
+		},
+		{
+			"modules/example.rb",
+			"https://github.com/rapid7/metasploit-framework/blob/master/modules/example.rb",
+		},
+	}
+
+	for _, tt := range tests {
+		actual := msf.FormatModuleURL(tt.in)
 		if actual != tt.out {
 			t.Errorf("\n got: %s\nwant: %s", tt.out, actual)
 		}
