@@ -3,8 +3,10 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -12,8 +14,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vulsio/msfdb-list-updater/models"
 	"golang.org/x/xerrors"
+
+	"github.com/vulsio/msfdb-list-updater/models"
 )
 
 // CacheDir :
@@ -51,7 +54,7 @@ func Exists(path string) (bool, error) {
 	if err == nil {
 		return true, nil
 	}
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		return false, nil
 	}
 	return true, err
@@ -140,7 +143,7 @@ func Read(filePath string) (models.Modules, error) {
 	}
 	defer f.Close()
 
-	b, err := ioutil.ReadAll(f)
+	b, err := io.ReadAll(f)
 	if err != nil {
 		return nil, err
 	}
