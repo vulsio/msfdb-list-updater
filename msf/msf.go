@@ -1,9 +1,12 @@
 package msf
 
 import (
+	"archive/tar"
 	"bufio"
+	"compress/gzip"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -12,19 +15,17 @@ import (
 
 	"golang.org/x/xerrors"
 
-	"github.com/vulsio/msfdb-list-updater/git"
 	log "github.com/vulsio/msfdb-list-updater/log"
 	"github.com/vulsio/msfdb-list-updater/models"
 	"github.com/vulsio/msfdb-list-updater/utils"
 )
 
 const (
-	repoURL = "https://github.com/rapid7/metasploit-framework.git"
+	repoURL = "https://github.com/rapid7/metasploit-framework/archive/refs/heads/master.tar.gz"
 	msfDir  = "rapid7"
 )
 
 var (
-	repoDir        string
 	titleRegex     = regexp.MustCompile(`['|\"]Name['|\"]\s*=>\s*['|\"|\(](.+)['|\"|\)]`)
 	summaryRegexp1 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*%q{([^}]*)}`)
 	summaryRegexp2 = regexp.MustCompile(`['|\"]Description['|\"]\s*=>\s*%q\(([^}]*) \),`)
@@ -42,97 +43,73 @@ var (
 	refRegexp    = regexp.MustCompile(`['|\"](URL)['|\"],\s+['|\"](\S+)['|\"]`)
 )
 
-// Config : Config parameters used in Git.
-type Config struct {
-	GitClient   git.Operations
-	CacheDir    string
-	VulnListDir string
-}
-
 // Update : Clone msf to the cache directory and search for the module recursively.
-func (c Config) Update() (err error) {
-	log.Infof("Fetching Metasploit framework...")
-	repoDir = filepath.Join(c.CacheDir, "metasploit-framework")
-	if _, err = c.GitClient.CloneOrPull(repoURL, repoDir); err != nil {
-		return xerrors.Errorf("failed to clone metasploit-framework repository: %w", err)
-	}
-
+func Update() (err error) {
 	log.Infof("Initialize directory...")
-	listDir := filepath.Join(utils.VulnListDir(), msfDir)
-	exists, err := utils.Exists(listDir)
+	if err := os.RemoveAll(filepath.Join(utils.VulnListDir(), msfDir)); err != nil {
+		return xerrors.Errorf("error in rm -rf %s: %w", filepath.Join(utils.VulnListDir(), msfDir), err)
+	}
+
+	log.Infof("Fetching Metasploit framework...")
+	resp, err := http.Get(repoURL)
 	if err != nil {
-		log.Errorf("%s", err)
-		return err
+		return xerrors.Errorf("error in get repository: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		_, _ = io.Copy(io.Discard, resp.Body)
+		return xerrors.Errorf("error in get repository: error request response with status code %d", resp.StatusCode)
 	}
 
-	if exists {
-		err := os.RemoveAll(listDir)
-		if err != nil {
-			log.Errorf("%s", err)
-			return err
-		}
+	gr, err := gzip.NewReader(resp.Body)
+	if err != nil {
+		return xerrors.Errorf("error in new gzip reader: %w", err)
 	}
+	defer gr.Close()
 
-	log.Infof("Parsing modules...")
-	for _, target := range []string{"modules/auxiliary", "modules/exploits"} {
-		moduleList, err := WalkDirTree(filepath.Join(repoDir, target))
+	tr := tar.NewReader(gr)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break
+		}
 		if err != nil {
-			log.Errorf("%s", err)
-			return err
+			return xerrors.Errorf("error in next tar reader: %w", err)
 		}
 
-		for _, m := range moduleList {
-			for _, cve := range m.CveIDs {
-				if err = utils.SaveCVEPerYear(msfDir, cve, m); err != nil {
-					return xerrors.Errorf("error in save: %w", err)
-				}
+		if hdr.FileInfo().IsDir() {
+			continue
+		}
+
+		filename := filepath.Join("metasploit-framework", strings.TrimPrefix(hdr.Name, "metasploit-framework-master"))
+
+		if !strings.HasPrefix(filename, "metasploit-framework/modules/auxiliary") && !strings.HasPrefix(filename, "metasploit-framework/modules/exploits") {
+			continue
+		}
+
+		if strings.HasPrefix(filepath.Base(filename), "example") {
+			continue
+		}
+
+		bs, err := io.ReadAll(tr)
+		if err != nil {
+			return xerrors.Errorf("error in read from tar reader: %w", err)
+		}
+
+		m, err := Parse(bs, filepath.Join(utils.CacheDir(), filename))
+		if err != nil {
+			return xerrors.Errorf("error in parse: %w", err)
+		}
+
+		for _, cve := range m.CveIDs {
+			if err = utils.SaveCVEPerYear(msfDir, cve, *m); err != nil {
+				return xerrors.Errorf("error in save: %w", err)
 			}
 		}
 	}
 
 	return nil
-}
-
-// WalkDirTree :
-func WalkDirTree(root string) ([]models.Module, error) {
-	modules := []models.Module{}
-
-	err := filepath.Walk(root,
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return xerrors.Errorf("file walk error: %w", err)
-			}
-			if info.IsDir() {
-				return nil
-			}
-
-			// Exclude the sample code
-			sample, err := filepath.Match("example*", info.Name())
-			if err != nil {
-				return xerrors.Errorf("error in file check: %w", err)
-			}
-			if sample {
-				return nil
-			}
-
-			f, err := ioutil.ReadFile(path)
-			if err != nil {
-				return xerrors.Errorf("error in file open: %w", err)
-			}
-
-			module, err := Parse(f, path)
-			if err != nil {
-				return xerrors.Errorf("error in parse: %w", err)
-			}
-			modules = append(modules, *module)
-
-			return nil
-		})
-	if err != nil {
-		return nil, xerrors.Errorf("error in walk: %w", err)
-	}
-
-	return modules, nil
 }
 
 // Parse : Extracts information from update_info of module as a regular expression.
@@ -143,7 +120,7 @@ func Parse(file []byte, path string) (*models.Module, error) {
 	// Substitute the first of the matched elements into the title
 	for _, m := range titleMatches {
 		if 1 < len(m) {
-			title = fmt.Sprintf("%s", m[1])
+			title = string(m[1])
 			break
 		}
 	}

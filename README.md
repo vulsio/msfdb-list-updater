@@ -13,6 +13,8 @@ $ msfdb-list-updater -h
 Usage of msfdb-list-updater:
   -target string
         update target (msf)
+
+$ msfdb-list-updater -target msf
 ```
 
 

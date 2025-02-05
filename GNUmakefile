@@ -3,7 +3,6 @@
 	install \
 	all \
 	vendor \
-	lint \
 	vet \
 	fmt \
 	fmtcheck \
@@ -20,7 +19,6 @@ BUILDTIME := $(shell date "+%Y%m%d_%H%M%S")
 LDFLAGS := -X 'main.version=$(VERSION)' \
         -X 'main.revision=$(REVISION)'
 GO := GO111MODULE=on go
-GO_OFF := GO111MODULE=off go
 
 all: build
 
@@ -29,10 +27,6 @@ build: main.go pretest fmt
 
 install: main.go
 	$(GO) install -ldflags "$(LDFLAGS)"
-
-lint:
-	$(GO_OFF) get -u golang.org/x/lint/golint
-	golint $(PKGS)
 
 vet:
 	echo $(PKGS) | xargs env $(GO) vet || exit;
@@ -43,7 +37,7 @@ fmt:
 fmtcheck:
 	$(foreach file,$(SRCS),gofmt -d $(file);)
 
-pretest: lint vet fmtcheck
+pretest: vet fmtcheck
 
 test: pretest
 	$(GO) test -cover -v ./... || exit;

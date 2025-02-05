@@ -1,7 +1,7 @@
 package msf_test
 
 import (
-	"io/ioutil"
+	"os"
 	"path"
 	"reflect"
 	"testing"
@@ -90,7 +90,7 @@ func TestParse(t *testing.T) {
 
 	for _, v := range vectors {
 		t.Run(path.Base(v.file), func(t *testing.T) {
-			f, err := ioutil.ReadFile(v.file)
+			f, err := os.ReadFile(v.file)
 			if err != nil {
 				t.Fatalf("ReadFile() error: %v", err)
 			}
