@@ -9,12 +9,7 @@ https://github.com/vulsio/msfdb-list
 
 # Usage
 ```
-$ msfdb-list-updater -h
-Usage of msfdb-list-updater:
-  -target string
-        update target (msf)
-
-$ msfdb-list-updater -target msf
+$ go run main.go ~/.cache/msfdb-list-updater/msfdb-list
 ```
 
 

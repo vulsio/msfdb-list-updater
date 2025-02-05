@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"time"
 
 	"golang.org/x/xerrors"
 
@@ -44,10 +45,10 @@ var (
 )
 
 // Update : Clone msf to the cache directory and search for the module recursively.
-func Update() (err error) {
+func Update(dir string) (err error) {
 	log.Infof("Initialize directory...")
-	if err := os.RemoveAll(filepath.Join(utils.VulnListDir(), msfDir)); err != nil {
-		return xerrors.Errorf("error in rm -rf %s: %w", filepath.Join(utils.VulnListDir(), msfDir), err)
+	if err := os.RemoveAll(filepath.Join(dir, msfDir)); err != nil {
+		return xerrors.Errorf("error in rm -rf %s: %w", filepath.Join(dir, msfDir), err)
 	}
 
 	log.Infof("Fetching Metasploit framework...")
@@ -97,16 +98,20 @@ func Update() (err error) {
 			return xerrors.Errorf("error in read from tar reader: %w", err)
 		}
 
-		m, err := Parse(bs, filepath.Join(utils.CacheDir(), filename))
+		m, err := Parse(bs, filename)
 		if err != nil {
 			return xerrors.Errorf("error in parse: %w", err)
 		}
 
 		for _, cve := range m.CveIDs {
-			if err = utils.SaveCVEPerYear(msfDir, cve, *m); err != nil {
+			if err = utils.SaveCVEPerYear(filepath.Join(dir, msfDir), cve, *m); err != nil {
 				return xerrors.Errorf("error in save: %w", err)
 			}
 		}
+	}
+
+	if err := utils.SetLastUpdatedDate(dir, time.Now().UTC()); err != nil {
+		return err
 	}
 
 	return nil
