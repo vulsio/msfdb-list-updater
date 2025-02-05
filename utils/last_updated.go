@@ -13,60 +13,16 @@ const (
 	lastUpdatedFile = "last_updated.json"
 )
 
-var (
-	lastUpdatedFilePath = filepath.Join(VulnListDir(), lastUpdatedFile)
-)
-
 // LastUpdated :
 type LastUpdated map[string]time.Time
 
-// GetLastUpdatedDate :
-func GetLastUpdatedDate(dist string) (time.Time, error) {
-	lastUpdated, err := getLastUpdatedDate()
-	if err != nil {
-		return time.Time{}, err
-	}
-
-	t, ok := lastUpdated[dist]
-	if !ok {
-		return time.Unix(0, 0), nil
-	}
-
-	return t, nil
-}
-
-// getLastUpdatedDate :
-func getLastUpdatedDate() (map[string]time.Time, error) {
-	lastUpdated := LastUpdated{}
-	if _, err := os.Stat(lastUpdatedFilePath); os.IsNotExist(err) {
-		return lastUpdated, nil
-	}
-
-	f, err := os.Open(lastUpdatedFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	if err = json.NewDecoder(f).Decode(&lastUpdated); err != nil {
-		return nil, err
-	}
-
-	return lastUpdated, nil
-}
-
 // SetLastUpdatedDate :
-func SetLastUpdatedDate(dist string, lastUpdatedDate time.Time) error {
-	lastUpdated, err := getLastUpdatedDate()
-	if err != nil {
-		return xerrors.Errorf("failed to get last updated date: %w", err)
-	}
-	lastUpdated[dist] = lastUpdatedDate
-
-	b, err := json.MarshalIndent(lastUpdated, "", "  ")
+func SetLastUpdatedDate(dir string, lastUpdatedDate time.Time) error {
+	b, err := json.MarshalIndent(LastUpdated{"msf": lastUpdatedDate}, "", "  ")
 	if err != nil {
 		return err
 	}
-	if err = os.WriteFile(lastUpdatedFilePath, b, 0600); err != nil {
+	if err = os.WriteFile(filepath.Join(dir, lastUpdatedFile), b, 0600); err != nil {
 		return xerrors.Errorf("failed to write last updated date: %w", err)
 	}
 
